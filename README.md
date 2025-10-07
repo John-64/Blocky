@@ -6,7 +6,13 @@
 A decentralized blockchain-based marketplace enabling secure peer-to-peer trading of used items without relying on a central platform.
 
 ## Features 🚀
-...
+- Create and publish new listings on the blockchain (with title, description, image?, and price);
+- Buyers can purchase items by paying the corresponding amount in ETH (or ERC20 tokens);
+- Funds are held in escrow — securely locked within the smart contract until the transaction is completed;
+- Funds are released only when one of the following conditions is met:
+    - the buyer confirms the purchase;
+    - a timeout expires, automatically finalizing the sale.
+- In case of issues, a dispute can be initiated, allowing further resolution mechanisms.
 
 ## Technologies 🛠️
 ...
