@@ -1,6 +1,6 @@
 # Blocky
 <p align="center"> 
-    <img src="icon.png" alt="Blocky Logo" width="220" height="220">
+    <img src="frontend/public/logo.png" alt="Blocky" width="220" height="220">
 </p>
 
 A decentralized blockchain-based marketplace enabling secure peer-to-peer trading of used items without relying on a central platform.
