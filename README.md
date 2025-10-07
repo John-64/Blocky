@@ -33,3 +33,14 @@ If you'd like to contribute to KeyForge, please follow these steps:
 
 ## License 📜
 This project is licensed under the MIT License. See the LICENSE file for details.
+
+### Utils 🧊
+Blockchain:
+- npx hardhat node
+Deploy:
+- npx hardhat ignition deploy ./ignition/modules/Marketplace.ts --network localhost
+Fast interaction:
+- npx hardhat run scripts/interact.js --network localhost 
+Frontend
+- cd frontend
+- npm run dev
