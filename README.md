@@ -3,7 +3,7 @@
     <img src="icon.png" alt="KeyForge Logo" width="220" height="220">
 </p>
 
-**Blocky** is a decentralized blockchain-based marketplace inspired by Vinted, enabling secure peer-to-peer trading of used items without relying on a central platform.
+A decentralized blockchain-based marketplace enabling secure peer-to-peer trading of used items without relying on a central platform.
 
 ## Features 🚀
 ...
