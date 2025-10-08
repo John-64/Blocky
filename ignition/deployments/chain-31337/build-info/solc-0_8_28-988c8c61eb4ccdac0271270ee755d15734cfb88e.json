@@ -1,0 +1,39 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-988c8c61eb4ccdac0271270ee755d15734cfb88e",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "contracts/Marketplace.sol": "project/contracts/Marketplace.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/Marketplace.sol": {
+        "content": "// SPDX-License-Identifier: UNLICENSED\npragma solidity ^0.8.28;\n\n/// @title Decentralized Marketplace with escrow\n/// @dev Extended version with title, description, condition, and 3-day timeout\ncontract Marketplace {\n    // --- Enums ---\n    enum State {\n        Active,     // Listing is available for purchase\n        Sold,       // Purchased, funds in escrow\n        Released,   // Funds released to seller\n        Disputed,   // Dispute opened\n        Cancelled   // Listing cancelled by seller\n    }\n\n    enum Condition {\n        New,        // Thing is brand new\n        VeryGood,   // Thing is in perfect condition\n        Good,       // Thing is in good condition\n        Damaged     // Thing is damaged\n    }\n\n    // --- Struct ---\n    struct Listing {\n        uint256 idListing;\n        address payable seller;\n        address payable buyer;\n        uint256 price;\n        string title;\n        string description;\n        Condition condition;\n        uint256 createdAt;\n        uint256 soldAt;\n        State state;\n    }\n\n    // --- State ---\n    uint256 public listingCount = 0;\n    mapping(uint256 => Listing) public listings;\n\n    // --- Events ---\n    event ListingCreated(\n        uint256 indexed id,\n        address indexed seller,\n        uint256 price,\n        string title,\n        Condition condition\n    );\n    event ListingCancelled(uint256 indexed id);\n    event ListingPurchased(uint256 indexed id, address indexed buyer);\n    event FundsReleased(uint256 indexed id, address indexed seller, uint256 amount);\n    event TimeoutClaimed(uint256 indexed id, address indexed seller);\n\n    // --- Modifiers ---\n    modifier onlySeller(uint256 _id) {\n        require(msg.sender == listings[_id].seller, \"Not the seller\");\n        _;\n    }\n\n    modifier onlyBuyer(uint256 _id) {\n        require(msg.sender == listings[_id].buyer, \"Not the buyer\");\n        _;\n    }\n\n    modifier exists(uint256 _id) {\n        require(_id < listingCount, \"Listing does not exist\");\n        _;\n    }\n\n    // --- Create listing ---\n    function createListing(\n        uint256 _price,\n        string calldata _title,\n        string calldata _description,\n        Condition _condition\n    ) external {\n        require(_price > 0, \"Price must be > 0\");\n        require(bytes(_title).length > 0, \"Title required\");\n\n        listings[listingCount] = Listing({\n            idListing: listingCount,\n            seller: payable(msg.sender),\n            buyer: payable(address(0)),\n            price: _price,\n            title: _title,\n            description: _description,\n            condition: _condition,\n            createdAt: block.timestamp,\n            soldAt: 0,           // ancora non venduto\n            state: State.Active\n        });\n\n        emit ListingCreated(listingCount, msg.sender, _price, _title, _condition);\n        listingCount++;\n    }\n\n    // --- Purchase listing ---\n    function purchaseListing(uint256 _id, uint256 _amount) external payable exists(_id) {\n        Listing storage l = listings[_id];\n        require(l.state == State.Active, \"Listing not active\");\n        require(msg.value == _amount, \"msg.value != amount\"); // il valore inviato deve corrispondere a _amount\n        require(_amount == l.price, \"Incorrect payment amount\"); // il valore inserito deve essere uguale al prezzo\n\n        l.buyer = payable(msg.sender);\n        l.state = State.Sold;\n        l.soldAt = block.timestamp; // salvo il momento dell'acquisto\n\n        emit ListingPurchased(_id, msg.sender);\n    }\n\n    // --- Release funds ---\n    function releaseFunds(uint256 _id) external onlySeller(_id) exists(_id) {\n        Listing storage l = listings[_id];\n        require(l.state == State.Sold, \"Funds not in escrow\");\n\n        uint256 amount = l.price;\n        l.state = State.Released;\n\n        (bool sent, ) = l.seller.call{value: amount}(\"\");\n        require(sent, \"Failed to send funds\");\n\n        emit FundsReleased(_id, l.seller, amount);\n    }\n\n    // --- Timeout claim (3 days from purchase) ---\n    function claimTimeout(uint256 _id) external onlySeller(_id) exists(_id) {\n        Listing storage l = listings[_id];\n        require(l.state == State.Sold, \"Listing not sold\");\n        require(block.timestamp >= l.soldAt + 3 days, \"Timeout not reached\");\n\n        uint256 amount = l.price;\n        l.state = State.Released;\n\n        (bool sent, ) = l.seller.call{value: amount}(\"\");\n        require(sent, \"Failed to send funds\");\n\n        emit TimeoutClaimed(_id, l.seller);\n    }\n\n    // --- View active listings ---\n    function getActiveListings()\n        external\n        view\n        returns (\n            uint256[] memory ids,\n            address[] memory sellers,\n            address[] memory buyers,\n            uint256[] memory prices,\n            string[] memory titles,\n            string[] memory descriptions,\n            Condition[] memory conditions,\n            uint256[] memory createdAts,\n            uint256[] memory soldAts,\n            State[] memory states\n        )\n    {\n        uint256 activeCount = 0;\n        for (uint256 i = 0; i < listingCount; i++) {\n            if (listings[i].state == State.Active) {\n                activeCount++;\n            }\n        }\n\n        ids = new uint256[](activeCount);\n        sellers = new address[](activeCount);\n        buyers = new address[](activeCount);\n        prices = new uint256[](activeCount);\n        titles = new string[](activeCount);\n        descriptions = new string[](activeCount);\n        conditions = new Condition[](activeCount);\n        createdAts = new uint256[](activeCount);\n        soldAts = new uint256[](activeCount);\n        states = new State[](activeCount);\n\n        uint256 index = 0;\n        for (uint256 i = 0; i < listingCount; i++) {\n            Listing storage l = listings[i];\n            if (l.state == State.Active) {\n                ids[index] = l.idListing;\n                sellers[index] = l.seller;\n                buyers[index] = l.buyer;\n                prices[index] = l.price;\n                titles[index] = l.title;\n                descriptions[index] = l.description;\n                conditions[index] = l.condition;\n                createdAts[index] = l.createdAt;\n                soldAts[index] = l.soldAt;\n                states[index] = l.state;\n                index++;\n            }\n        }\n    }\n}\n"
+      }
+    }
+  }
+}
