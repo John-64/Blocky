@@ -15,12 +15,12 @@ contract Marketplace {
 
     enum Condition {
         New,        // Thing is brand new
-        VeryGood,   // Thing is in perfect condition
-        Good,       // Thing is in good condition
+        Good,       // Thing is in perfect condition
+        Acceptable, // Thing is in good condition
         Damaged     // Thing is damaged
     }
 
-    // --- Struct ---
+    // Struct for a listing
     struct Listing {
         uint256 idListing;
         address payable seller;
@@ -34,11 +34,14 @@ contract Marketplace {
         State state;
     }
 
-    // --- State ---
+    // State variables
     uint256 public listingCount = 0;
     mapping(uint256 => Listing) public listings;
+    
+    // Timeout period for seller to claim funds if buyer doesn't confirm receipt
+    uint256 public constant TIMEOUT_PERIOD = 3 days;
 
-    // --- Events ---
+    // Events
     event ListingCreated(
         uint256 indexed id,
         address indexed seller,
@@ -50,8 +53,9 @@ contract Marketplace {
     event ListingPurchased(uint256 indexed id, address indexed buyer);
     event FundsReleased(uint256 indexed id, address indexed seller, uint256 amount);
     event TimeoutClaimed(uint256 indexed id, address indexed seller);
+    event RefundIssued(uint256 indexed id, address indexed buyer, uint256 amount);
 
-    // --- Modifiers ---
+    // Modifiers for access control and validation
     modifier onlySeller(uint256 _id) {
         require(msg.sender == listings[_id].seller, "Not the seller");
         _;
@@ -67,15 +71,23 @@ contract Marketplace {
         _;
     }
 
-    // --- Create listing ---
+    /// @notice Creates a new listing in the marketplace
+    /// @dev Initializes a new `Listing` struct and stores it in the `listings` mapping
+    /// @param _price The price of the item in wei (must be greater than 0)
+    /// @param _title The title of the listing (cannot be empty)
+    /// @param _description A detailed description of the item for sale (cannot be empty)
+    /// @param _condition The condition of the item (0=New, 1=Good, 2=Acceptable, 3=Damaged)
+    /// @custom:emits ListingCreated emitted when a new listing is successfully created
     function createListing(
         uint256 _price,
         string calldata _title,
         string calldata _description,
         Condition _condition
     ) external {
-        require(_price > 0, "Price must be > 0");
-        require(bytes(_title).length > 0, "Title required");
+        require(_price > 0, "Price must be greater than 0!");
+        require(bytes(_title).length > 0, "The title is required!");
+        require(bytes(_description).length > 0, "The description is required!");
+        require(uint8(_condition) <= uint8(Condition.Damaged), "Invalid condition, please select the correct one! (0=New, 1=Good, 2=Acceptable, 3=Damaged)");
 
         listings[listingCount] = Listing({
             idListing: listingCount,
@@ -86,7 +98,7 @@ contract Marketplace {
             description: _description,
             condition: _condition,
             createdAt: block.timestamp,
-            soldAt: 0,           // ancora non venduto
+            soldAt: 0,
             state: State.Active
         });
 
@@ -94,50 +106,77 @@ contract Marketplace {
         listingCount++;
     }
 
-    // --- Purchase listing ---
-    function purchaseListing(uint256 _id, uint256 _amount) external payable exists(_id) {
-        Listing storage l = listings[_id];
-        require(l.state == State.Active, "Listing not active");
-        require(msg.value == _amount, "msg.value != amount"); // il valore inviato deve corrispondere a _amount
-        require(_amount == l.price, "Incorrect payment amount"); // il valore inserito deve essere uguale al prezzo
-
-        l.buyer = payable(msg.sender);
-        l.state = State.Sold;
-        l.soldAt = block.timestamp; // salvo il momento dell'acquisto
-
+    /// @notice Allows a buyer to purchase an active listing by sending the exact payment amount
+    /// @dev Transfers ownership of the listing to the buyer and marks it as sold.
+    /// @dev The listing must exist, be active, and the caller cannot be the seller.
+    /// @param _id The unique identifier of the listing to purchase
+    /// @custom:emits ListingPurchased Emitted when a listing is successfully purchased
+    function purchaseListing(uint256 _id) 
+        external 
+        payable 
+        exists(_id) 
+    {
+        Listing storage listing = listings[_id];
+        
+        require(listing.state == State.Active, "Listing must be active!");
+        require(msg.sender != listing.seller, "You cannot buy your own listing.");
+        require(msg.value == listing.price, "Incorrect payment amount, please send the exact price.");
+        
+        listing.buyer = payable(msg.sender);
+        listing.soldAt = block.timestamp;
+        listing.state = State.Sold;
+        
+        // Decrement active listings count
+        listingCount--;
+        
         emit ListingPurchased(_id, msg.sender);
     }
 
-    // --- Release funds ---
-    function releaseFunds(uint256 _id) external onlySeller(_id) exists(_id) {
-        Listing storage l = listings[_id];
-        require(l.state == State.Sold, "Funds not in escrow");
+    /// @notice Allows the seller to cancel an active listing
+    /// @dev Only the seller of the listing can call this function.
+    /// @dev The listing must be in the `Active` state to be cancelled.
+    /// @dev Once cancelled, the total active listings count is decremented.
+    /// @param _id The unique identifier of the listing to cancel
+    /// @custom:emits ListingCancelled Emitted when a listing is successfully cancelled
+    function cancelListing(uint256 _id) 
+        external 
+        exists(_id) 
+        onlySeller(_id) 
+    {
+        Listing storage listing = listings[_id];
+        require(listing.state == State.Active, "You can only cancel active listings!");
+        
+        listing.state = State.Cancelled;
 
-        uint256 amount = l.price;
-        l.state = State.Released;
+        // Decrement active listings count
+        listingCount--;
 
-        (bool sent, ) = l.seller.call{value: amount}("");
-        require(sent, "Failed to send funds");
-
-        emit FundsReleased(_id, l.seller, amount);
+        emit ListingCancelled(_id);
     }
 
-    // --- Timeout claim (3 days from purchase) ---
-    function claimTimeout(uint256 _id) external onlySeller(_id) exists(_id) {
-        Listing storage l = listings[_id];
-        require(l.state == State.Sold, "Listing not sold");
-        require(block.timestamp >= l.soldAt + 3 days, "Timeout not reached");
-
-        uint256 amount = l.price;
-        l.state = State.Released;
-
-        (bool sent, ) = l.seller.call{value: amount}("");
-        require(sent, "Failed to send funds");
-
-        emit TimeoutClaimed(_id, l.seller);
+    /// @notice Releases the escrowed funds to the seller after a successful purchase
+    /// @dev Can only be called by the buyer of the listing.
+    /// @dev The listing must be in the `Sold` state (funds held in escrow).
+    /// @dev Once released, the seller receives the payment and the listing state is updated.
+    /// @param _id The unique identifier of the listing whose funds are to be released
+    /// @custom:emits FundsReleased Emitted when the payment is released to the seller
+    function releaseFunds(uint256 _id) 
+        external 
+        exists(_id) 
+        onlyBuyer(_id) 
+    {
+        Listing storage listing = listings[_id];
+        require(listing.state == State.Sold, "Funds already released or not in escrow!");
+        
+        listing.state = State.Released;
+        uint256 amount = listing.price;
+        
+        emit FundsReleased(_id, listing.seller, amount);
+        listing.seller.transfer(amount);
     }
 
-    // --- View active listings ---
+    /// @notice Retrieves all active listings in the marketplace
+    /// @dev Iterates through the `listings` mapping and collects details of listings in the `Active` state.
     function getActiveListings()
         external
         view
@@ -189,5 +228,149 @@ contract Marketplace {
                 index++;
             }
         }
+    }
+
+    /// @notice Retrieves all purchases made by the caller
+    /// @dev Iterates through the `listings` mapping and collects details of listings where the caller is the buyer.
+    function getMyPurchases()
+        external
+        view
+        returns (
+            uint256[] memory ids,
+            address[] memory sellers,
+            uint256[] memory prices,
+            string[] memory titles,
+            State[] memory states,
+            uint256[] memory soldAts
+        )
+    {
+        uint256 purchaseCount = 0;
+        for (uint256 i = 0; i < listingCount; i++) {
+            if (listings[i].buyer == msg.sender) {
+                purchaseCount++;
+            }
+        }
+
+        ids = new uint256[](purchaseCount);
+        sellers = new address[](purchaseCount);
+        prices = new uint256[](purchaseCount);
+        titles = new string[](purchaseCount);
+        states = new State[](purchaseCount);
+        soldAts = new uint256[](purchaseCount);
+
+        uint256 index = 0;
+        for (uint256 i = 0; i < listingCount; i++) {
+            if (listings[i].buyer == msg.sender) {
+                Listing storage l = listings[i];
+                ids[index] = l.idListing;
+                sellers[index] = l.seller;
+                prices[index] = l.price;
+                titles[index] = l.title;
+                states[index] = l.state;
+                soldAts[index] = l.soldAt;
+                index++;
+            }
+        }
+    }
+
+    /// @notice Retrieves all sales made by the caller
+    /// @dev Iterates through the `listings` mapping and collects details of listings where the caller is the seller.
+    function getMySales()
+        external
+        view
+        returns (
+            uint256[] memory ids,
+            address[] memory buyers,
+            uint256[] memory prices,
+            string[] memory titles,
+            State[] memory states,
+            uint256[] memory soldAts
+        )
+    {
+        uint256 salesCount = 0;
+        for (uint256 i = 0; i < listingCount; i++) {
+            if (listings[i].seller == msg.sender) {
+                salesCount++;
+            }
+        }
+
+        ids = new uint256[](salesCount);
+        buyers = new address[](salesCount);
+        prices = new uint256[](salesCount);
+        titles = new string[](salesCount);
+        states = new State[](salesCount);
+        soldAts = new uint256[](salesCount);
+
+        uint256 index = 0;
+        for (uint256 i = 0; i < listingCount; i++) {
+            if (listings[i].seller == msg.sender) {
+                Listing storage l = listings[i];
+                ids[index] = l.idListing;
+                buyers[index] = l.buyer;
+                prices[index] = l.price;
+                titles[index] = l.title;
+                states[index] = l.state;
+                soldAts[index] = l.soldAt;
+                index++;
+            }
+        }
+    }
+
+    // TO-DO: migliorare la gestione delle dispute e timeot (qui sotto una versione semplificata)
+    // IDEA: considerare un sistema di arbitrato decentralizzato
+
+    // --- Claim timeout
+    function claimTimeout(uint256 _id) 
+        external 
+        exists(_id) 
+        onlySeller(_id) 
+    {
+        Listing storage listing = listings[_id];
+        require(listing.state == State.Sold, "Not in escrow");
+        require(
+            block.timestamp >= listing.soldAt + TIMEOUT_PERIOD,
+            "Timeout period not elapsed"
+        );
+        
+        listing.state = State.Released;
+        uint256 amount = listing.price;
+        
+        emit TimeoutClaimed(_id, listing.seller);
+        listing.seller.transfer(amount);
+    }
+
+    // --- Open dispute
+    function openDispute(uint256 _id) 
+        external 
+        exists(_id) 
+        onlyBuyer(_id) 
+    {
+        Listing storage listing = listings[_id];
+        require(listing.state == State.Sold, "Can only dispute active escrow");
+        require(
+            block.timestamp < listing.soldAt + TIMEOUT_PERIOD,
+            "Timeout period elapsed, contact seller directly"
+        );
+        
+        listing.state = State.Disputed;
+        // In una versione più completa, qui si potrebbe integrare un sistema di arbitrato
+    }
+
+    // --- Refund (in case of dispute resolution - simplified version) ---
+    function issueRefund(uint256 _id) 
+        external 
+        exists(_id) 
+    {
+        Listing storage listing = listings[_id];
+        require(listing.state == State.Disputed, "Not in disputed state");
+        // Nota: in produzione aggiungere controllo ruolo arbitro
+        
+        uint256 amount = listing.price;
+        address payable buyer = listing.buyer;
+        
+        listing.state = State.Cancelled;
+        
+        emit RefundIssued(_id, buyer, amount);
+        buyer.transfer(amount);
     }
 }

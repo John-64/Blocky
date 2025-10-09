@@ -1,5 +1,4 @@
 import ConnectWallet from "./components/ConnectWallet";
-import CreateListing from "./components/CreateListing";
 import ListingsList from "./components/ListingsList";
 import { useMarketplace } from "./hooks/useMarketplace";
 
@@ -14,7 +13,6 @@ export default function App() {
         </h1>
 
         <ConnectWallet />
-        <CreateListing contract={contract} onCreated={() => console.log("Nuovo annuncio creato")} />
         <ListingsList contract={contract} />
       </div>
     </div>
