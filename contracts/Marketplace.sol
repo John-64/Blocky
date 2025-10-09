@@ -111,11 +111,7 @@ contract Marketplace {
     /// @dev The listing must exist, be active, and the caller cannot be the seller.
     /// @param _id The unique identifier of the listing to purchase
     /// @custom:emits ListingPurchased Emitted when a listing is successfully purchased
-    function purchaseListing(uint256 _id) 
-        external 
-        payable 
-        exists(_id) 
-    {
+    function purchaseListing(uint256 _id) external payable exists(_id) {
         Listing storage listing = listings[_id];
         
         require(listing.state == State.Active, "Listing must be active!");
@@ -126,11 +122,9 @@ contract Marketplace {
         listing.soldAt = block.timestamp;
         listing.state = State.Sold;
         
-        // Decrement active listings count
-        listingCount--;
-        
         emit ListingPurchased(_id, msg.sender);
     }
+
 
     /// @notice Allows the seller to cancel an active listing
     /// @dev Only the seller of the listing can call this function.
@@ -147,9 +141,6 @@ contract Marketplace {
         require(listing.state == State.Active, "You can only cancel active listings!");
         
         listing.state = State.Cancelled;
-
-        // Decrement active listings count
-        listingCount--;
 
         emit ListingCancelled(_id);
     }

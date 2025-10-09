@@ -1,49 +1,23 @@
-import { useState, useEffect } from "react";
+interface Props {
+  account: string | null;
+  connectWallet: () => Promise<void>;
+}
 
-export default function ConnectWallet() {
-  const [account, setAccount] = useState<string | null>(null);
-
-  const connect = async () => {
-    if (!(window as any).ethereum) {
-      alert("Please, install MetaMask for using this marketplace!");
-      return;
-    }
-    try {
-      const accounts = await (window as any).ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      setAccount(accounts[0]);
-    } catch (err) {
-      console.error("Wallet connection rejected", err);
-    }
-  };
-
-  // ⚡ Tenta la connessione automatica al mount
-  useEffect(() => {
-    if (!(window as any).ethereum) return;
-
-    (async () => {
-      try {
-        const accounts = await (window as any).ethereum.request({
-          method: "eth_accounts",
-        });
-        if (accounts.length > 0) setAccount(accounts[0]);
-      } catch (err) {
-        console.error("Errore durante il check account", err);
-      }
-    })();
-  }, []);
-
+export default function ConnectWallet({ account, connectWallet }: Props) {
+  const displayAccount = account ? `${account.substring(0, 6)}...${account.substring(account.length - 4)}` : null;
+  
   return (
-    <div className="mb-4">
+    <div className="flex">
       {account ? (
-        <p className="text-gray-600">Connected: {account}</p>
+        <p className="text-sm text-gray-600 border border-green-500 bg-green-50 p-2 rounded-full px-4">
+          Connesso: <span className="font-mono font-medium text-green-700">{displayAccount}</span>
+        </p>
       ) : (
         <button
-          onClick={connect}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:cursor-pointer"
+          onClick={connectWallet}
+          className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition shadow-md"
         >
-          Connect your wallet
+          Connetti Wallet
         </button>
       )}
     </div>
