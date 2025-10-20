@@ -24,11 +24,26 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
 
     setLoading(true);
     try {
+      // Converti il prezzo in wei
       const priceInWei = ethers.parseEther(price);
-      const tx = await contract.createListing(priceInWei, title, description, parseInt(condition));
+
+      // Limita la lunghezza del titolo/descrizione per evitare problemi RPC
+      const safeTitle = title.slice(0, 100);       // max 100 caratteri
+      const safeDescription = description.slice(0, 500); // max 500 caratteri
+
+      // Invio della transazione con gasLimit maggiore
+      const tx = await contract.createListing(
+        priceInWei,
+        safeTitle,
+        safeDescription,
+        parseInt(condition),
+        { gasLimit: 500000 }
+      );
+
       await tx.wait(); // Aspetta che la transazione sia minata
       
       onCreateSuccess();
+      
       // Reset form
       setTitle("");
       setDescription("");
@@ -36,11 +51,15 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
       setCondition("0");
     } catch (err: any) {
       console.error("Errore durante la creazione dell'annuncio:", err);
-      showNotification(err.reason || "Creazione annuncio fallita.", 'error');
+
+      // Se err.error.data contiene la vera causa dell'errore, mostrala
+      const reason = err?.reason || err?.error?.data?.message || "Creazione annuncio fallita.";
+      showNotification(reason, 'error');
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="p-6 bg-white border border-gray-200 rounded-lg shadow-md">

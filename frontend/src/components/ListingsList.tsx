@@ -26,12 +26,41 @@ export default function ListingsList({ contract, account, onPurchaseSuccess, sho
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
 
   useEffect(() => {
+    const checkContract = async () => {
+      if (!contract) return;
+      
+      try {
+        // Verifica che il contratto esista
+        const code = await contract.runner?.provider?.getCode(contract.target);
+        console.log("Contract code length:", code?.length);
+        
+        if (!code || code === '0x') {
+          console.error("⚠️ Il contratto non è deployato a questo indirizzo!");
+          showNotification("Contratto non trovato. Verifica l'indirizzo e la rete.", 'error');
+          return;
+        }
+        
+        // Verifica il listingCount
+        const count = await contract.listingCount();
+        console.log("Listing count:", count.toString());
+        
+      } catch (err) {
+        console.error("Errore verifica contratto:", err);
+      }
+    };
+    
+    checkContract();
+  }, [contract]);
+
+  useEffect(() => {
     const loadListings = async () => {
       if (!contract) return;
       try {
         setLoading(true);
         // La tua funzione getActiveListings restituisce un array di array, non un oggetto
+        console.log("Ok1");
         const [ ids, sellers, buyers, prices, titles, descriptions, conditions, createdAts, soldAts, states ] = await contract.getActiveListings();
+        console.log("Ok2");
 
         const parsed: Listing[] = ids.map((id: bigint, i: number) => ({
           id: id.toString(),
@@ -59,6 +88,11 @@ export default function ListingsList({ contract, account, onPurchaseSuccess, sho
     if (!contract) return;
     setPurchasingId(listing.id);
     try {
+      // Simula la chiamata prima di inviarla
+      await contract.purchaseListing.staticCall(listing.id, {
+        value: listing.priceInWei,
+      });
+      
       const tx = await contract.purchaseListing(listing.id, {
         value: listing.priceInWei,
       });

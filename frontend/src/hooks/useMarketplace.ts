@@ -1,8 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { ethers, type Signer } from "ethers"; 
-// Assicurati che questi percorsi siano corretti nel tuo progetto
 import abi from "/Users/gianni/Progetti/Blocky/artifacts/contracts/Marketplace.sol/Marketplace.json";
-import deployedAddresses from "/Users/gianni/Progetti/Blocky/ignition/deployments/chain-31337/deployed_addresses.json";
+import deployedAddresses from "/Users/gianni/Progetti/Blocky/ignition/deployments/chain-80002/deployed_addresses.json";
 
 export function useMarketplace() {
   const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
@@ -10,83 +9,125 @@ export function useMarketplace() {
   const [contract, setContract] = useState<ethers.Contract | null>(null);
   const [account, setAccount] = useState<string | null>(null);
 
-  const initEthers = useCallback(async (currentProvider: ethers.BrowserProvider, currentAccount: string) => {
+  // Dati rete Amoy Testnet con simbolo unico AMY
+  const AMOY_NETWORK = {
+    chainId: "0x13882",
+    chainName: "Amoy",
+    rpcUrls: ["https://polygon-amoy.infura.io/v3/48ac5909913246b989505d1191478b39"],
+    nativeCurrency: { name: "Polkadot Token", symbol: "POL", decimals: 18 },
+    blockExplorerUrls: ["https://amoy.polygonscan.com"]
+    };
+
+  // 1️⃣ Switch automatico alla rete Amoy
+  const switchToAmoy = useCallback(async () => {
+    if (!(window as any).ethereum) return;
+
     try {
-        const address = deployedAddresses["MarketplaceModule#Marketplace"];
-        const s = await currentProvider.getSigner(currentAccount);
-        const c = new ethers.Contract(address, abi.abi, s);
-        
-        setSigner(s);
-        setContract(c);
-        setAccount(currentAccount);
-    } catch (error) {
-        console.error("Errore nell'inizializzazione di Ethers:", error);
-        setAccount(null);
+      await (window as any).ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: AMOY_NETWORK.chainId }]
+      });
+    } catch (switchError: any) {
+      if (switchError.code === 4902) {
+        try {
+          await (window as any).ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [AMOY_NETWORK]
+          });
+        } catch (addError) {
+          console.error("Errore nell'aggiungere la rete Amoy:", addError);
+        }
+      } else {
+        console.error("Errore nel cambio rete:", switchError);
+      }
     }
   }, []);
-  
-  // Funzione per connettere/richiedere l'account (chiamata dal componente ConnectWallet)
+
+  // 2️⃣ Inizializza provider, signer e contratto
+  const initEthers = useCallback(async (currentProvider: ethers.BrowserProvider, currentAccount: string) => {
+    try {
+      const address = deployedAddresses["MarketplaceModule#Marketplace"];
+      const s = await currentProvider.getSigner(currentAccount);
+      const c = new ethers.Contract(address, abi.abi, s);
+
+      setSigner(s);
+      setContract(c);
+      setAccount(currentAccount);
+    } catch (error) {
+      console.error("Errore nell'inizializzazione di Ethers:", error);
+      setAccount(null);
+    }
+  }, []);
+
+  // 3️⃣ Connetti wallet
   const connectWallet = useCallback(async () => {
     if (!(window as any).ethereum) {
-        alert("Installa MetaMask per usare questo marketplace!");
-        return;
+      alert("Installa MetaMask per usare questo marketplace!");
+      return;
     }
-    
+
     try {
-        const accounts = await (window as any).ethereum.request({ method: "eth_requestAccounts" });
-        const p = new ethers.BrowserProvider((window as any).ethereum);
-        setProvider(p);
-        
-        if (accounts.length > 0) {
-            await initEthers(p, accounts[0]);
-        }
-        
+      await switchToAmoy();
+
+      const accounts: string[] = await (window as any).ethereum.request({ method: "eth_requestAccounts" });
+      const p = new ethers.BrowserProvider((window as any).ethereum);
+      setProvider(p);
+
+      if (accounts.length > 0) {
+        await initEthers(p, accounts[0]);
+      }
     } catch (err) {
-        console.error("Connessione wallet rifiutata", err);
+      console.error("Connessione wallet rifiutata o errore:", err);
     }
-  }, [initEthers]);
-  
+  }, [initEthers, switchToAmoy]);
 
   useEffect(() => {
-    // 1. Inizializzazione e check account esistente
     const initialCheck = async () => {
-        if ((window as any).ethereum) {
-            const p = new ethers.BrowserProvider((window as any).ethereum);
-            setProvider(p);
+      if ((window as any).ethereum) {
+        await switchToAmoy();
+        const p = new ethers.BrowserProvider((window as any).ethereum);
+        setProvider(p);
 
-            const accounts = await p.listAccounts();
-            if (accounts.length > 0) {
-                // Se c'è un account già connesso, inizializza contratto e signer
-                await initEthers(p, accounts[0].address); 
-            }
+        const accounts = await p.listAccounts();
+        if (accounts.length > 0) {
+          await initEthers(p, accounts[0].address);
         }
+      }
     };
     initialCheck();
 
-    // 2. Sottoscrizione al cambio account (fondamentale)
     if ((window as any).ethereum) {
-        const handleAccountsChanged = (accounts: string[]) => {
-            if (accounts.length > 0) {
-                // L'account è cambiato, re-inizializza
-                const p = new ethers.BrowserProvider((window as any).ethereum);
-                initEthers(p, accounts[0]);
-            } else {
-                // Disconnessione
-                setAccount(null);
-                setSigner(null);
-                setContract(null);
-            }
-        };
+      const handleAccountsChanged = (accounts: string[]) => {
+        if (accounts.length > 0) {
+          const p = new ethers.BrowserProvider((window as any).ethereum);
+          initEthers(p, accounts[0]);
+        } else {
+          setAccount(null);
+          setSigner(null);
+          setContract(null);
+        }
+      };
 
-        (window as any).ethereum.on('accountsChanged', handleAccountsChanged);
-        
-        // Pulizia listener al dismount
-        return () => {
-            (window as any).ethereum.removeListener('accountsChanged', handleAccountsChanged);
-        };
+      (window as any).ethereum.on("accountsChanged", handleAccountsChanged);
+
+      return () => {
+        (window as any).ethereum.removeListener("accountsChanged", handleAccountsChanged);
+      };
     }
-  }, [initEthers]);
+  }, [initEthers, switchToAmoy]);
 
-  // Espone l'account e la funzione per connettersi
-  return { provider, signer, contract, account, connectWallet };
+  // Funzione per comprare un articolo
+  const buyItem = useCallback(async (itemId: number, priceInEth: string) => {
+    if (!contract || !signer) return;
+
+    try {
+      const tx = await contract.buyItem(itemId, { value: ethers.parseEther(priceInEth) });
+      await tx.wait();
+      console.log("Articolo comprato!");
+    } catch (err) {
+      console.error("Errore acquisto:", err);
+    }
+  }, [contract, signer]);
+
+  return { provider, signer, contract, account, connectWallet, buyItem };
 }

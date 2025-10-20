@@ -1,5 +1,5 @@
 import type { HardhatUserConfig } from "hardhat/config";
-
+import "dotenv/config";
 import hardhatToolboxViemPlugin from "@nomicfoundation/hardhat-toolbox-viem";
 import { configVariable } from "hardhat/config";
 
@@ -14,7 +14,7 @@ const config: HardhatUserConfig = {
         version: "0.8.28",
         settings: {
           optimizer: {
-            enabled: true,
+            enabled: false,
             runs: 200,
           },
         },
@@ -35,6 +35,11 @@ const config: HardhatUserConfig = {
       chainType: "l1",
       url: configVariable("SEPOLIA_RPC_URL"),
       accounts: [configVariable("SEPOLIA_PRIVATE_KEY")],
+    },
+    polygonAmoy: {
+      type: "http",
+      url: configVariable("AMOY_RPC_URL"),
+      accounts: [configVariable("AMOY_PRIVATE_KEY")],
     },
   },
 };

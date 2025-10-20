@@ -22,6 +22,7 @@ export default function MyListings({ contract, showNotification }: Props) {
     const [activeTab, setActiveTab] = useState<'sales' | 'purchases'>('sales');
     const [processingId, setProcessingId] = useState<string | null>(null);
 
+    
     useEffect(() => {
         const loadData = async () => {
             if (!contract) return;
