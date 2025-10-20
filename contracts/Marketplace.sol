@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 /// @title Decentralized Marketplace with escrow
-/// @dev Extended version with title, description, condition, and 3-day timeout
+/// @dev Extended version with title, description, condition, and x-day timeout
 contract Marketplace {
     // --- Enums ---
     enum State {
@@ -39,7 +39,7 @@ contract Marketplace {
     mapping(uint256 => Listing) public listings;
     
     // Timeout period for seller to claim funds if buyer doesn't confirm receipt
-    uint256 public constant TIMEOUT_PERIOD = 3 days;
+    uint256 public constant TIMEOUT_PERIOD = 1 days;
 
     // Events
     event ListingCreated(
@@ -84,7 +84,7 @@ contract Marketplace {
         string calldata _description,
         Condition _condition
     ) external {
-        require(_price > 0, "Price must be greater than 0!");
+        require(_price >= 0, "Price must be greater than 0!");
         require(bytes(_title).length > 0, "The title is required!");
         require(bytes(_description).length > 0, "The description is required!");
         require(uint8(_condition) <= uint8(Condition.Damaged), "Invalid condition, please select the correct one! (0=New, 1=Good, 2=Acceptable, 3=Damaged)");

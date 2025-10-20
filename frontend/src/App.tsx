@@ -1,4 +1,3 @@
-// src/App.tsx
 import { useState } from "react";
 import logo from "../src/assets/logo-full.png";
 import ConnectWallet from "./components/ConnectWallet.tsx";
@@ -6,10 +5,11 @@ import ListingsList from "./components/ListingsList.tsx";
 import CreateListing from "./components/CreateListing.tsx";
 import MyListings from "./components/MyListings.tsx";
 import Notification from "./components/Notification.tsx";
-import { useMarketplace } from "./hooks/useMarketplace";
+//import { useMarketplace } from "./hooks/useMarketplace";
+import { useHardhatMarketplace } from "./hooks/useMarketplaceHardhat";
 
 export default function App() {
-  const { contract, account, connectWallet } = useMarketplace();
+  const { contract, account, connectWallet } = useHardhatMarketplace();
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   
   // Chiave per forzare il re-render di liste dopo un'azione (es. acquisto, creazione)
@@ -17,12 +17,12 @@ export default function App() {
 
   const showNotification = (message: string, type: 'success' | 'error') => {
     setNotification({ message, type });
-    setTimeout(() => setNotification(null), 5000); // Nasconde dopo 5s
+    setTimeout(() => setNotification(null), 2500);
   };
 
   const handleActionSuccess = () => {
     showNotification("Operazione completata con successo!", 'success');
-    setRefreshKey(prevKey => prevKey + 1); // Forzo il refresh delle liste
+    setRefreshKey(prevKey => prevKey + 1);
   };
 
   return (
