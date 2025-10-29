@@ -31,10 +31,10 @@ export default function App() {
       {notification && <Notification message={notification.message} type={notification.type} />}
 
       <div className="container mx-auto p-6">
-        <header className="grid grid-cols-[10%_60%_30%] items-center mb-8 h-20">
+        <header className="grid grid-cols-[15%_55%_30%] items-center mb-8 h-20">
           
-          <div className="flex items-center justify-start w-max">
-            <img src={logo} alt="Blocky Logo" className="h-10" />
+          <div className="flex items-center justify-start w-max cursor-pointer">
+            <a href="/"><img src={logo} alt="Blocky Logo" className="h-10" /></a>
           </div>
 
           <div className="relative w-full">
@@ -57,34 +57,31 @@ export default function App() {
           </div>
 
           <div className="flex items-center justify-end gap-2">
-              <ConnectWallet account={account} connectWallet={connectWallet} />
+            <MyListings 
+              contract={contract} 
+              showNotification={showNotification} 
+            />
 
-              <CreateListing
-                contract={contract}
-                onCreateSuccess={handleActionSuccess}
-                showNotification={showNotification}
-              />
+            <CreateListing
+              contract={contract}
+              onCreateSuccess={handleActionSuccess}
+              showNotification={showNotification}
+            />
 
-              <ProjectInfoPopup />
+            <ConnectWallet account={account} connectWallet={connectWallet} />
+
+            <ProjectInfoPopup />
           </div>
         </header>
 
         {account && contract ? (
-          <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <main className="grid gap-8">
             <div className="lg:col-span-2 space-y-8">
                 <ListingsList 
                     key={`listings-${refreshKey}`}
                     contract={contract} 
                     account={account} 
                     onPurchaseSuccess={handleActionSuccess} 
-                    showNotification={showNotification} 
-                />
-            </div>
-            
-            <div className="space-y-8">
-                <MyListings 
-                    key={`my-listings-${refreshKey}`}
-                    contract={contract} 
                     showNotification={showNotification} 
                 />
             </div>

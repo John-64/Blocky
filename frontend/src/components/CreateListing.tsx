@@ -14,7 +14,7 @@ export function CreateListingButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="px-4 py-2 text-sm text-white bg-teal-500 rounded-lg hover:bg-teal-600 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer">
+      className="px-4 py-2 text-sm text-white bg-sky-600 rounded-lg hover:bg-sky-700 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-600 cursor-pointer">
       Crea annuncio
     </button>
   );
@@ -90,21 +90,17 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
 
   return (
     <>
-      {/* 🔘 Pulsante per aprire il modal */}
       <CreateListingButton onClick={openModal} />
 
-      {/* Modal Overlay */}
       {isOpen && (
         <div
           className="fixed top-0 left-0 right-0 bottom-0 bg-black/30 flex items-center justify-center z-50 p-4 overflow-y-auto"
           style={{ minHeight: "100vh", minWidth: "100vw" }}
           onClick={handleOverlayClick}
         >
-          {/* Modal Content */}
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            {/* Header */}
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center rounded-t-xl">
-              <h2 className="text-2xl font-bold text-gray-800">Inserisci i dettagli</h2>
+              <h2 className="text-lg font-bold text-gray-800">Inserisci i dettagli</h2>
               <button
                 onClick={closeModal}
                 className="text-gray-400 hover:text-gray-600 transition p-1 cursor-pointer"
@@ -127,7 +123,6 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
               </button>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               <div>
                 <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -176,7 +171,7 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
                     placeholder="0.001"
                     step="0.000001"
                     min="0"
-                    className="w-full border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3 transition"
+                    className="w-full border border-gray-300 rounded-lg h-10 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3 transition"
                     disabled={loading}
                   />
                 </div>
@@ -189,7 +184,7 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
                     id="condition"
                     value={condition}
                     onChange={(e) => setCondition(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3 transition cursor-pointer"
+                    className="w-full border border-gray-300 rounded-lg shadow-sm h-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3 transition cursor-pointer"
                     disabled={loading}
                   >
                     <option value="0">Nuovo</option>
@@ -200,7 +195,6 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
                 </div>
               </div>
 
-              {/* Footer Buttons */}
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="button"
@@ -213,7 +207,7 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition font-semibold shadow-md cursor-pointer"
+                  className="flex-1 bg-teal-600 text-white py-3 px-4 rounded-lg hover:bg-teal-700 disabled:bg-teal-300 disabled:cursor-not-allowed transition font-semibold shadow-md cursor-pointer"
                 >
                   {loading ? "Pubblicazione..." : "Pubblica annuncio"}
                 </button>

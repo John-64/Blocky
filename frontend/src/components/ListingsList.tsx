@@ -122,9 +122,7 @@ export default function ListingsList({ contract, account, onPurchaseSuccess, sho
   };
 
   return (
-    <div className="p-6 bg-white border border-gray-200 rounded-2xl shadow-lg">
-      <h2 className="text-2xl font-bold mb-4 text-gray-900 text-center">Annunci attivi</h2>
-      
+    <div>
       {loading ? (
         <div className="flex justify-center py-10">
           <Loader2 size={32} className="animate-spin text-blue-500" />
@@ -167,7 +165,7 @@ export default function ListingsList({ contract, account, onPurchaseSuccess, sho
                 <button
                   onClick={() => handlePurchase(l)}
                   disabled={purchasingId === l.id}
-                  className="mt-4 w-full py-2 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:bg-green-300 transition text-sm font-medium cursor-pointer"
+                  className="mt-4 w-full py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 disabled:bg-teal-300 transition text-sm font-medium cursor-pointer"
                 >
                   {purchasingId === l.id ? (
                     <span className="flex items-center justify-center gap-2">
