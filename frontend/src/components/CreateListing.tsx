@@ -1,5 +1,7 @@
+// src/components/CreateListing.tsx
 import { useState } from "react";
 import { ethers } from "ethers";
+import { PlusCircle } from "lucide-react";
 
 interface Props {
   contract: ethers.Contract | null;
@@ -7,6 +9,18 @@ interface Props {
   showNotification: (message: string, type: 'success' | 'error') => void;
 }
 
+/** 🔹 Bottone riutilizzabile per aprire il modal di creazione */
+export function CreateListingButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="px-4 py-2 text-sm text-white bg-teal-500 rounded-lg hover:bg-teal-600 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer">
+      Crea annuncio
+    </button>
+  );
+}
+
+/** 🔹 Modal di creazione annuncio */
 export default function CreateListing({ contract, onCreateSuccess, showNotification }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -25,18 +39,18 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
   const closeModal = () => {
     setIsOpen(false);
     resetForm();
-    document.body.style.overflow = 'unset';
+    document.body.style.overflow = "unset";
   };
 
   const openModal = () => {
     setIsOpen(true);
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contract || !title || !description || !price) {
-      showNotification("Per favore, compila tutti i campi.", 'error');
+      showNotification("Per favore, compila tutti i campi.", "error");
       return;
     }
 
@@ -55,14 +69,14 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
       );
 
       await tx.wait();
-      
+
       onCreateSuccess();
       closeModal();
-      showNotification("Annuncio creato con successo!", 'success');
+      showNotification("Annuncio creato con successo!", "success");
     } catch (err: any) {
       console.error("Errore durante la creazione dell'annuncio:", err);
       const reason = err?.reason || err?.error?.data?.message || "Creazione annuncio fallita.";
-      showNotification(reason, 'error');
+      showNotification(reason, "error");
     } finally {
       setLoading(false);
     }
@@ -76,20 +90,19 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
 
   return (
     <>
-      <button
-        onClick={openModal}
-        className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition font-semibold shadow-md hover:shadow-lg cursor-pointer"
-      >
-        Crea annuncio
-      </button>
+      {/* 🔘 Pulsante per aprire il modal */}
+      <CreateListingButton onClick={openModal} />
 
+      {/* Modal Overlay */}
       {isOpen && (
         <div
-          className="fixed top-0 left-0 right-0 bottom-0 bg-black/20 flex items-center justify-center z-50 p-4 overflow-y-auto"
-          style={{ minHeight: '100vh', minWidth: '100vw' }}
+          className="fixed top-0 left-0 right-0 bottom-0 bg-black/30 flex items-center justify-center z-50 p-4 overflow-y-auto"
+          style={{ minHeight: "100vh", minWidth: "100vw" }}
           onClick={handleOverlayClick}
         >
+          {/* Modal Content */}
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            {/* Header */}
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center rounded-t-xl">
               <h2 className="text-2xl font-bold text-gray-800">Inserisci i dettagli</h2>
               <button
@@ -98,13 +111,23 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
                 disabled={loading}
                 aria-label="Chiudi"
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
               </button>
             </div>
 
+            {/* Form */}
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               <div>
                 <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -177,6 +200,7 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
                 </div>
               </div>
 
+              {/* Footer Buttons */}
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="button"
