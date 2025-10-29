@@ -1,4 +1,3 @@
-// src/components/ListingsList.tsx
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { Loader2, Tag, User, Clock } from "lucide-react";
@@ -23,6 +22,8 @@ interface Listing {
 
 export default function ListingsList({ contract, account, onPurchaseSuccess, showNotification }: Props) {
   const [listings, setListings] = useState<Listing[]>([]);
+  const [filtered, setFiltered] = useState<Listing[]>([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
 
@@ -32,8 +33,8 @@ export default function ListingsList({ contract, account, onPurchaseSuccess, sho
 
       try {
         const code = await contract.runner?.provider?.getCode(contract.target);
-        if (!code || code === '0x') {
-          showNotification("Contratto non trovato. Verifica l'indirizzo e la rete.", 'error');
+        if (!code || code === "0x") {
+          showNotification("Contratto non trovato. Verifica l'indirizzo e la rete.", "error");
           return;
         }
 
@@ -67,9 +68,10 @@ export default function ListingsList({ contract, account, onPurchaseSuccess, sho
         }));
 
         setListings(parsed);
+        setFiltered(parsed);
       } catch (err) {
         console.error("Errore durante il caricamento degli annunci:", err);
-        showNotification("Caricamento annunci fallito.", 'error');
+        showNotification("Caricamento annunci fallito.", "error");
       } finally {
         setLoading(false);
       }
@@ -77,6 +79,25 @@ export default function ListingsList({ contract, account, onPurchaseSuccess, sho
 
     if (contract) loadListings();
   }, [contract]);
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      const query = e.detail.toLowerCase();
+      setSearch(query);
+      setFiltered(
+        listings.filter(
+          (l) =>
+            l.title.toLowerCase().includes(query) ||
+            l.description.toLowerCase().includes(query) ||
+            l.seller.toLowerCase().includes(query)
+        )
+      );
+    };
+
+    window.addEventListener("searchListings", handler);
+    return () => window.removeEventListener("searchListings", handler);
+  }, [listings]);
+
 
   const handlePurchase = async (listing: Listing) => {
     if (!contract) return;
@@ -94,7 +115,7 @@ export default function ListingsList({ contract, account, onPurchaseSuccess, sho
       showNotification("Acquisto completato con successo!", "success");
     } catch (err: any) {
       console.error("Errore durante l'acquisto:", err);
-      showNotification(err.reason || "Acquisto fallito.", 'error');
+      showNotification(err.reason || "Acquisto fallito.", "error");
     } finally {
       setPurchasingId(null);
     }
@@ -102,17 +123,19 @@ export default function ListingsList({ contract, account, onPurchaseSuccess, sho
 
   return (
     <div className="p-6 bg-white border border-gray-200 rounded-2xl shadow-lg">
-      <h2 className="text-2xl font-bold mb-6 text-gray-900 text-center">Annunci attivi</h2>
-
+      <h2 className="text-2xl font-bold mb-4 text-gray-900 text-center">Annunci attivi</h2>
+      
       {loading ? (
         <div className="flex justify-center py-10">
           <Loader2 size={32} className="animate-spin text-blue-500" />
         </div>
-      ) : listings.length === 0 ? (
-        <p className="text-gray-500 text-center py-6">Nessun annuncio attivo al momento.</p>
+      ) : filtered.length === 0 ? (
+        <p className="text-gray-500 text-center py-6">
+          Nessun annuncio trovato{search ? " per questa ricerca." : " al momento."}
+        </p>
       ) : (
-        <div className="grid gap-6 flex">
-          {listings.map((l) => (
+        <div className="grid gap-6">
+          {filtered.map((l) => (
             <div
               key={l.id}
               className="bg-gray-50 border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col justify-between"
@@ -124,9 +147,16 @@ export default function ListingsList({ contract, account, onPurchaseSuccess, sho
                 <p className="text-gray-700 text-sm mb-3 line-clamp-3">{l.description}</p>
 
                 <div className="space-y-1 text-sm text-gray-600">
-                  <p><strong>Condizione:</strong> {l.condition}</p>
-                  <p><strong>Prezzo:</strong> <span className="text-green-600 font-medium">{l.price}</span></p>
-                  <p className="flex items-center gap-1"><User size={14} /> {l.seller}</p>
+                  <p>
+                    <strong>Condizione:</strong> {l.condition}
+                  </p>
+                  <p>
+                    <strong>Prezzo:</strong>{" "}
+                    <span className="text-green-600 font-medium">{l.price}</span>
+                  </p>
+                  <p className="flex items-center gap-1">
+                    <User size={14} /> {l.seller}
+                  </p>
                   <p className="flex items-center gap-1 text-xs text-gray-500">
                     <Clock size={14} /> {l.createdAt}
                   </p>

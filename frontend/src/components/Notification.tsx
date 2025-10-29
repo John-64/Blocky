@@ -1,4 +1,3 @@
-// src/components/Notification.tsx
 interface Props {
     message: string;
     type: 'success' | 'error';

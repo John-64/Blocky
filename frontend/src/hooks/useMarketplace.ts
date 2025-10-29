@@ -9,7 +9,6 @@ export function useMarketplace() {
   const [contract, setContract] = useState<ethers.Contract | null>(null);
   const [account, setAccount] = useState<string | null>(null);
 
-  // Dati rete Amoy Testnet con simbolo unico AMY
   const AMOY_NETWORK = {
     chainId: "0x13882",
     chainName: "Amoy",
@@ -18,7 +17,6 @@ export function useMarketplace() {
     blockExplorerUrls: ["https://amoy.polygonscan.com"]
     };
 
-  // 1️⃣ Switch automatico alla rete Amoy
   const switchToAmoy = useCallback(async () => {
     if (!(window as any).ethereum) return;
 
@@ -43,7 +41,6 @@ export function useMarketplace() {
     }
   }, []);
 
-  // 2️⃣ Inizializza provider, signer e contratto
   const initEthers = useCallback(async (currentProvider: ethers.BrowserProvider, currentAccount: string) => {
     try {
       const address = deployedAddresses["MarketplaceModule#Marketplace"];
@@ -59,7 +56,6 @@ export function useMarketplace() {
     }
   }, []);
 
-  // 3️⃣ Connetti wallet
   const connectWallet = useCallback(async () => {
     if (!(window as any).ethereum) {
       alert("Installa MetaMask per usare questo marketplace!");
@@ -116,7 +112,6 @@ export function useMarketplace() {
     }
   }, [initEthers, switchToAmoy]);
 
-  // Funzione per comprare un articolo
   const buyItem = useCallback(async (itemId: number, priceInEth: string) => {
     if (!contract || !signer) return;
 

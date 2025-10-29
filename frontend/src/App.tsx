@@ -7,12 +7,12 @@ import MyListings from "./components/MyListings.tsx";
 import Notification from "./components/Notification.tsx";
 //import { useMarketplace } from "./hooks/useMarketplace";
 import { useHardhatMarketplace } from "./hooks/useMarketplaceHardhat";
+import { Search } from "lucide-react"
 
 export default function App() {
   const { contract, account, connectWallet } = useHardhatMarketplace();
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   
-  // Chiave per forzare il re-render di liste dopo un'azione (es. acquisto, creazione)
   const [refreshKey, setRefreshKey] = useState(0); 
 
   const showNotification = (message: string, type: 'success' | 'error') => {
@@ -26,25 +26,48 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {notification && <Notification message={notification.message} type={notification.type} />}
 
       <div className="container mx-auto p-6">
-        <header className="flex justify-between items-center mb-8">
-            <img src={logo} alt="Blocky Logo" className="w-40" />
+        <header className="grid grid-cols-[20%_60%_20%] items-center mb-8 h-20">
+          
+          <div className="flex items-center justify-start">
+            <img src={logo} alt="Blocky Logo" className="h-10" />
+          </div>
 
-            {/* Passa account e la funzione di connessione all'hook */}
-            <div className="flex items-center justify-center">
-              <ConnectWallet account={account} connectWallet={connectWallet} /> 
-            </div>
+          <div className="relative w-full">
+          <Search
+            size={18}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+          />
+
+          <input
+            type="text"
+            placeholder="Cerca qui gli articoli..."
+            className="w-full pl-10 pr-3 py-3 bg-[#edf2f2] rounded-lg text-sm text-gray-700
+                      focus:none focus:none focus:none outline-none
+                      transition placeholder-gray-600"
+            onChange={(e) => {
+              const event = new CustomEvent("searchListings", { detail: e.target.value });
+              window.dispatchEvent(event);
+            }}
+          />
+        </div>
+
+
+          <div className="flex justify-end">
+            <ConnectWallet account={account} connectWallet={connectWallet} />
+          </div>
         </header>
+
+
 
         {account && contract ? (
           <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Colonna principale: Lista Annunci Attivi */}
             <div className="lg:col-span-2 space-y-8">
                 <ListingsList 
-                    key={`listings-${refreshKey}`} // Forza re-render
+                    key={`listings-${refreshKey}`}
                     contract={contract} 
                     account={account} 
                     onPurchaseSuccess={handleActionSuccess} 
@@ -52,7 +75,6 @@ export default function App() {
                 />
             </div>
             
-            {/* Colonna laterale: Creazione Annuncio e I Miei Annunci */}
             <div className="space-y-8">
                 <CreateListing 
                     contract={contract} 
@@ -60,7 +82,7 @@ export default function App() {
                     showNotification={showNotification} 
                 />
                 <MyListings 
-                    key={`my-listings-${refreshKey}`} // Forza re-render
+                    key={`my-listings-${refreshKey}`}
                     contract={contract} 
                     showNotification={showNotification} 
                 />

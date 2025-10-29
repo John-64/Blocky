@@ -1,4 +1,3 @@
-// src/components/CreateListing.tsx
 import { useState } from "react";
 import { ethers } from "ethers";
 
@@ -77,7 +76,6 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
 
   return (
     <>
-      {/* Pulsante per aprire il modal */}
       <button
         onClick={openModal}
         className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition font-semibold shadow-md hover:shadow-lg cursor-pointer"
@@ -85,16 +83,13 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
         Crea annuncio
       </button>
 
-      {/* Modal Overlay */}
       {isOpen && (
         <div
           className="fixed top-0 left-0 right-0 bottom-0 bg-black/20 flex items-center justify-center z-50 p-4 overflow-y-auto"
           style={{ minHeight: '100vh', minWidth: '100vw' }}
           onClick={handleOverlayClick}
         >
-          {/* Modal Content */}
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            {/* Header */}
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center rounded-t-xl">
               <h2 className="text-2xl font-bold text-gray-800">Inserisci i dettagli</h2>
               <button
@@ -110,7 +105,6 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
               </button>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               <div>
                 <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -183,7 +177,6 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
                 </div>
               </div>
 
-              {/* Footer Buttons */}
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="button"

@@ -1,4 +1,3 @@
-// src/components/MyListings.tsx
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { Loader2, Package, ShoppingBag, XCircle, CheckCircle2 } from "lucide-react";
@@ -87,19 +86,23 @@ export default function MyListings({ contract, showNotification }: Props) {
       return contract!.releaseFunds(id);
     });
 
-  // 🎨 Colori dinamici per gli stati
   const getStateColor = (state: number) => {
     switch (state) {
+       // Attivo
       case 0:
-        return "bg-blue-50 border-blue-200"; // Attivo
+        return "bg-blue-50 border-blue-200";
+      // In attesa
       case 1:
-        return "bg-yellow-50 border-yellow-200"; // In attesa
+        return "bg-yellow-50 border-yellow-200";
+      // Completato
       case 2:
-        return "bg-green-50 border-green-200"; // Completato
+        return "bg-green-50 border-green-200";
+      // In disputa
       case 3:
-        return "bg-orange-50 border-orange-200"; // In disputa
+        return "bg-orange-50 border-orange-200"; 
+      // Annullato
       case 4:
-        return "bg-red-50 border-red-200"; // Annullato
+        return "bg-red-50 border-red-200"; 
       default:
         return "bg-gray-50 border-gray-200";
     }
