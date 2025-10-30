@@ -13,7 +13,6 @@ import { Search } from "lucide-react"
 export default function App() {
   const { contract, account, connectWallet } = useHardhatMarketplace();
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); 
 
   const showNotification = (message: string, type: 'success' | 'error') => {

@@ -1,7 +1,6 @@
-// src/components/CreateListing.tsx
 import { useState } from "react";
 import { ethers } from "ethers";
-import { PlusCircle } from "lucide-react";
+import { XCircle } from "lucide-react";
 
 interface Props {
   contract: ethers.Contract | null;
@@ -9,7 +8,6 @@ interface Props {
   showNotification: (message: string, type: 'success' | 'error') => void;
 }
 
-/** 🔹 Bottone riutilizzabile per aprire il modal di creazione */
 export function CreateListingButton({ onClick }: { onClick: () => void }) {
   return (
     <button
@@ -20,7 +18,6 @@ export function CreateListingButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-/** 🔹 Modal di creazione annuncio */
 export default function CreateListing({ contract, onCreateSuccess, showNotification }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -107,19 +104,7 @@ export default function CreateListing({ contract, onCreateSuccess, showNotificat
                 disabled={loading}
                 aria-label="Chiudi"
               >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
+                <XCircle size={24} />
               </button>
             </div>
 

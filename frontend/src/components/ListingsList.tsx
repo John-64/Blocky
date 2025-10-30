@@ -53,8 +53,7 @@ export default function ListingsList({ contract, account, onPurchaseSuccess, sho
       if (!contract) return;
       try {
         setLoading(true);
-        const [ids, sellers, buyers, prices, titles, descriptions, conditions, createdAts] =
-          await contract.getActiveListings();
+        const [ids, sellers, buyers, prices, titles, descriptions, conditions, createdAts] = await contract.getActiveListings();
 
         const parsed: Listing[] = ids.map((id: bigint, i: number) => ({
           id: id.toString(),
@@ -67,8 +66,12 @@ export default function ListingsList({ contract, account, onPurchaseSuccess, sho
           createdAt: new Date(Number(createdAts[i]) * 1000).toLocaleString(),
         }));
 
-        setListings(parsed);
-        setFiltered(parsed);
+        const listingsForDisplay = parsed.filter(listing => 
+            account ? listing.seller.toLowerCase() !== account.toLowerCase() : true
+        );
+        
+        setListings(listingsForDisplay);
+        setFiltered(listingsForDisplay);
       } catch (err) {
         console.error("Errore durante il caricamento degli annunci:", err);
         showNotification("Caricamento annunci fallito.", "error");
