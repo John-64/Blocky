@@ -3,7 +3,7 @@ import logo from "../src/assets/logo-full.png";
 import ConnectWallet from "./components/ConnectWallet";
 import ProjectInfoPopup from './components/ProjectInfoPopup';
 import ListingsList from "./components/ListingsList";
-import CreateListing, { CreateListingButton } from "./components/CreateListing";
+import CreateListing from "./components/CreateListing";
 import MyListings from "./components/MyListings";
 import Notification from "./components/Notification";
 //import { useMarketplace } from "./hooks/useMarketplace";
@@ -11,6 +11,7 @@ import { useHardhatMarketplace } from "./hooks/useMarketplaceHardhat";
 import { Search } from "lucide-react"
 
 export default function App() {
+  //const { contract, account, connectWallet } = useMarketplace();
   const { contract, account, connectWallet } = useHardhatMarketplace();
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [refreshKey, setRefreshKey] = useState(0); 
