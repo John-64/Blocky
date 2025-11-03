@@ -33,9 +33,14 @@ A decentralized blockchain-based marketplace enabling secure peer-to-peer transi
 - Wallet Integration: MetaMask
 
 ## Installation 📦
-...
+1. Download the ZIP file.
+2. Extract it, then navigate to the frontend folder and install the dependencies:
+     ```bash
+    cd frontend
+    npm install
+3. Next, follow the Hardhat setup steps if you want to use the Hardhat blockchain. Otherwise, follow the Polygon setup instructions.
 
-## Usage with HardHat Blockchain 🔗
+## Usage with Hardhat Blockchain 🔗
 1. Compile the Smartcontract:
    ```bash
    npx hardhat compile
