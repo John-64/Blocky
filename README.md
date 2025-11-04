@@ -18,13 +18,13 @@ A decentralized blockchain-based marketplace enabling secure peer-to-peer transi
  
 ## Screenshots
 <p align="center"> 
-    <img src="media/2. Screenshot.png" alt="Listings list" height="200">
-    <img src="media/1. Screenshot.png" alt="Create listing" height="200">
+    <img src="media/2. Screenshot.png" alt="Listings list" width="45%">
+    <img src="media/1. Screenshot.png" alt="Create listing" width="45%">
 </p>
 
 <p align="center"> 
-    <img src="media/3. Screenshot.png" alt="My listings" height="200">
-    <img src="media/7. Screenshot.png" alt="Partial refund" height="200">
+    <img src="media/3. Screenshot.png" alt="My listings" width="45%">
+    <img src="media/7. Screenshot.png" alt="Partial refund" width="45%">
 </p>
 
 
