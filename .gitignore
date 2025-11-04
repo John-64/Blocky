@@ -17,7 +17,7 @@ dist-ssr
 artifacts/
 cache/
 .env
-deployed_addresses.json
+ignition/deployments/
 
 # Editor directories and files
 .vscode/*
