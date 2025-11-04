@@ -38,7 +38,6 @@ A decentralized blockchain-based marketplace enabling secure peer-to-peer transi
 1. Download the ZIP file.
 2. Extract it, then navigate to the frontend folder and install the dependencies:
     ```bash
-    cd frontend
     npm install
 3. Set up the blockchain environment:
 - If you want to use a local Hardhat blockchain, follow the steps in the Usage with Hardhat Blockchain section.
