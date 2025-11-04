@@ -61,10 +61,6 @@ A decentralized blockchain-based marketplace enabling secure peer-to-peer transi
      ```bash
      http://127.0.0.1:5173
 
- ### Notes
- - You won’t have an account with test POL tokens by default, so you’ll need to request some from a Polygon faucet. You can easily get free POL from [here](https://faucet.stakepool.dev.br/amoy) or [here](https://faucet.polygon.technology/);
- - You’ll also need a MetaMask account to connect to the Polygon network. If you don’t have one yet, you can create it [here](https://developer.metamask.io/).
-
 ## Usage with Polygon Blockchain
 1. Configure the frontend connection:
 - Open app.tsx.
@@ -84,8 +80,10 @@ A decentralized blockchain-based marketplace enabling secure peer-to-peer transi
 6. Open your browser and visit:
      ```bash
      http://127.0.0.1:5173
-- In this case you don't have account with balance, so you have to retrive some POL, i suggest you to use this site for easly get POL: https://faucet.stakepool.dev.br/amoy or https://faucet.polygon.technology/
-- You also need to create and https://developer.metamask.io/
+
+ ### Notes
+ - You won’t have an account with test POL tokens by default, so you’ll need to request some from a Polygon faucet. You can easily get free POL from [here](https://faucet.stakepool.dev.br/amoy) or [here](https://faucet.polygon.technology/);
+ - You’ll also need a MetaMask account to connect to the Polygon network. If you don’t have one yet, you can create it [here](https://developer.metamask.io/).
 
 ## Future improvements
 - Implement a true consensus mechanism for dispute resolution;
