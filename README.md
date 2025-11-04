@@ -62,7 +62,17 @@ A decentralized blockchain-based marketplace enabling secure peer-to-peer transi
      http://127.0.0.1:5173
 
 ## Usage with Polygon Blockchain
-...
+Go to app.tsx and remove the comment from the line 9 and 14 and comment the 10 and 15
+3. In a new terminal window, deploy the smart contract to the local blockchain:
+    ```bash
+    npx hardhat ignition deploy ignition/modules/Marketplace.ts --network polygonAmoy
+4. Start the application:
+     ```bash
+    cd frontend
+    npm run dev
+5. Open your browser and visit:
+     ```bash
+     http://127.0.0.1:5173
 
 ## Notes
 This project was created for the course "Sicurezza dei Dati" at the Università degli Studi di Salerno.
