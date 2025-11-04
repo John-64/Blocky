@@ -16,7 +16,6 @@ dist-ssr
 # Hardhat
 artifacts/
 cache/
-.env
 ignition/deployments/
 
 # Editor directories and files
