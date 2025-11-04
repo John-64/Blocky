@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { ethers, type Signer, type BrowserProvider, type Contract } from "ethers";
-import marketplaceAbi from "/Users/gianni/Progetti/Blocky/artifacts/contracts/Marketplace.sol/Marketplace.json";
-import deployedAddresses from "/Users/gianni/Progetti/Blocky/ignition/deployments/chain-31337/deployed_addresses.json";
+import marketplaceAbi from "../../../artifacts/contracts/Marketplace.sol/Marketplace.json";
+import deployedAddresses from "../../../ignition/deployments/chain-31337/deployed_addresses.json";
 
 interface MarketplaceHook {
   provider: BrowserProvider | null;

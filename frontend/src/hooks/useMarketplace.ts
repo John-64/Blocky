@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { ethers, type Signer } from "ethers"; 
-import abi from "/Users/gianni/Progetti/Blocky/artifacts/contracts/Marketplace.sol/Marketplace.json";
-import deployedAddresses from "/Users/gianni/Progetti/Blocky/ignition/deployments/chain-80002/deployed_addresses.json";
+import marketplaceAbi from "../../../artifacts/contracts/Marketplace.sol/Marketplace.json";
+import deployedAddresses from "../../../ignition/deployments/chain-80002/deployed_addresses.json";
 
 export function useMarketplace() {
   const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
@@ -45,7 +45,7 @@ export function useMarketplace() {
     try {
       const address = deployedAddresses["MarketplaceModule#Marketplace"];
       const s = await currentProvider.getSigner(currentAccount);
-      const c = new ethers.Contract(address, abi.abi, s);
+      const c = new ethers.Contract(address, marketplaceAbi.abi, s);
 
       setSigner(s);
       setContract(c);
