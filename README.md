@@ -44,7 +44,7 @@ A decentralized blockchain-based marketplace enabling secure peer-to-peer transi
 - Otherwise, follow the Polygon setup instructions. 
 
 ## Usage with Hardhat Blockchain
-1. Compile the Smartcontract:
+1. Compile the smart contract:
     ```bash
     npx hardhat compile
 2. Start a local Hardhat blockchain:
@@ -61,25 +61,38 @@ A decentralized blockchain-based marketplace enabling secure peer-to-peer transi
      ```bash
      http://127.0.0.1:5173
 
+ ### Notes
+ - You won’t have an account with test POL tokens by default, so you’ll need to request some from a Polygon faucet. You can easily get free POL from [here](https://faucet.stakepool.dev.br/amoy) or [here](https://faucet.polygon.technology/);
+ - You’ll also need a MetaMask account to connect to the Polygon network. If you don’t have one yet, you can create it [here](https://developer.metamask.io/).
+
 ## Usage with Polygon Blockchain
-Go to app.tsx and remove the comment from the line 9 and 14 and comment the 10 and 15
-3. In a new terminal window, deploy the smart contract to the local blockchain:
+1. Configure the frontend connection:
+- Open app.tsx.
+- Uncomment lines 9 and 14.
+- Comment out lines 10 and 15.
+2. Open the .env file and fill in your personal configuration details (RPC URL and PRIVATE KEY).
+3. Compile the smart contract:
+    ```bash
+    npx hardhat compile
+4. In a new terminal window, deploy the smart contract to the blockchain:
     ```bash
     npx hardhat ignition deploy ignition/modules/Marketplace.ts --network polygonAmoy
-4. Start the application:
+5. Start the application:
      ```bash
     cd frontend
     npm run dev
-5. Open your browser and visit:
+6. Open your browser and visit:
      ```bash
      http://127.0.0.1:5173
-
-## Notes
-This project was created for the course "Sicurezza dei Dati" at the Università degli Studi di Salerno.
+- In this case you don't have account with balance, so you have to retrive some POL, i suggest you to use this site for easly get POL: https://faucet.stakepool.dev.br/amoy or https://faucet.polygon.technology/
+- You also need to create and https://developer.metamask.io/
 
 ## Future improvements
 - Implement a true consensus mechanism for dispute resolution;
 - Add ratings and reviews for buyers and sellers.
+
+## Info
+This project was created for the course "Sicurezza dei Dati" at the Università degli Studi di Salerno.
 
 ## Contribution
 If you'd like to contribute to Bloky, please follow these steps:
